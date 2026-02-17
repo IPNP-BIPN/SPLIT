@@ -1,0 +1,19 @@
+# Nextflow
+.nextflow/
+.nextflow.log*
+work/
+results/
+test_results/
+
+# macOS
+.DS_Store
+._*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temp
+*.tmp

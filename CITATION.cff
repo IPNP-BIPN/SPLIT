@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: "SPLIT — SNP-Level Inspection of Parental Transcripts"
+message: "If you use this pipeline, please cite it using these metadata."
+type: software
+license: MIT
+repository-code: "https://github.com/IPNP-BIPN/SPLIT"
+url: "https://github.com/IPNP-BIPN/SPLIT"
+authors:
+  - family-names: ""
+    given-names: "Benjamin"
+    affiliation: "IPNP-BIPN"
+keywords:
+  - nextflow
+  - allele-specific
+  - rnaseq
+  - snpsplit
+  - star
+  - featurecounts
+  - imprinting
+  - mouse-genetics

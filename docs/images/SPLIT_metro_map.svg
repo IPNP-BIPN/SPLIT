@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 750" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="920" height="750" fill="url(#bg)" rx="16"/>
+
+  <!-- Title -->
+  <text x="460" y="42" text-anchor="middle" font-size="28" font-weight="700" fill="#f8fafc" letter-spacing="2">SPLIT</text>
+  <text x="460" y="62" text-anchor="middle" font-size="11" fill="#94a3b8" letter-spacing="1">SNP-Level Inspection of Parental Transcripts</text>
+
+  <!-- ═══ INPUT ═══ -->
+  <rect x="340" y="80" width="240" height="30" rx="15" fill="#334155" stroke="#64748b" stroke-width="1" filter="url(#shadow)"/>
+  <text x="460" y="100" text-anchor="middle" font-size="12" font-weight="600" fill="#e2e8f0">FASTQ / SRA / GEO</text>
+
+  <!-- Input → References (left) -->
+  <path d="M460,110 L460,135" stroke="#38bdf8" stroke-width="2.5" opacity="0.6"/>
+
+  <!-- ═══ DOWNLOAD REFERENCES ═══ -->
+  <rect x="340" y="135" width="240" height="30" rx="8" fill="#0c4a6e" stroke="#38bdf8" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="355" y="154" font-size="10" font-weight="700" fill="#38bdf8">1</text>
+  <text x="460" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#7dd3fc">Download References</text>
+  <text x="460" y="155" text-anchor="middle" font-size="9" fill="#475569" dy="15">FASTA + GTF + VCF (Ensembl/MGP)</text>
+
+  <!-- Refs → SNPsplit prep -->
+  <path d="M460,165 L460,200" stroke="#a78bfa" stroke-width="2.5" opacity="0.6"/>
+
+  <!-- ═══ SNPSPLIT GENOME PREP ═══ -->
+  <rect x="330" y="200" width="260" height="30" rx="8" fill="#2e1065" stroke="#a78bfa" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="345" y="219" font-size="10" font-weight="700" fill="#a78bfa">2</text>
+  <text x="460" y="219" text-anchor="middle" font-size="11" font-weight="600" fill="#c4b5fd">SNPsplit Genome Prep</text>
+  <text x="460" y="219" text-anchor="middle" font-size="9" fill="#475569" dy="15">dual-hybrid N-masking</text>
+
+  <!-- Prep → Read length estimate (center) -->
+  <path d="M460,230 L460,265" stroke="#94a3b8" stroke-width="2" opacity="0.5"/>
+
+  <!-- ═══ ESTIMATE READ LENGTH ═══ -->
+  <rect x="370" y="265" width="180" height="24" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
+  <text x="460" y="281" text-anchor="middle" font-size="10" fill="#94a3b8">Estimate Read Length</text>
+
+  <!-- → STAR indexes (fork) -->
+  <path d="M460,289 L460,305" stroke="#94a3b8" stroke-width="2" opacity="0.4"/>
+
+  <!-- ═══ STAR INDEX — two branches ═══ -->
+  <!-- N-mask branch (left) -->
+  <path d="M460,305 C460,315 260,315 260,330" stroke="#fb923c" stroke-width="2.5" opacity="0.6"/>
+  <!-- Ref branch (right) -->
+  <path d="M460,305 C460,315 660,315 660,330" stroke="#34d399" stroke-width="2.5" opacity="0.6"/>
+
+  <!-- STAR Index N-mask -->
+  <rect x="170" y="330" width="180" height="28" rx="8" fill="#431407" stroke="#fb923c" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="185" y="348" font-size="10" font-weight="700" fill="#fb923c">3a</text>
+  <text x="260" y="348" text-anchor="middle" font-size="11" font-weight="600" fill="#fdba74">STAR Index (N-mask)</text>
+
+  <!-- STAR Index Ref -->
+  <rect x="570" y="330" width="180" height="28" rx="8" fill="#022c22" stroke="#34d399" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="585" y="348" font-size="10" font-weight="700" fill="#34d399">3b</text>
+  <text x="660" y="348" text-anchor="middle" font-size="11" font-weight="600" fill="#6ee7b7">STAR Index (Ref)</text>
+
+  <!-- Down from indexes to alignment -->
+  <path d="M260,358 L260,390" stroke="#fb923c" stroke-width="2.5" opacity="0.6"/>
+  <path d="M660,358 L660,390" stroke="#34d399" stroke-width="2.5" opacity="0.6"/>
+
+  <!-- ═══ STAR ALIGN ═══ -->
+  <rect x="170" y="390" width="180" height="28" rx="8" fill="#431407" stroke="#fb923c" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="185" y="408" font-size="10" font-weight="700" fill="#fb923c">4a</text>
+  <text x="260" y="408" text-anchor="middle" font-size="11" font-weight="600" fill="#fdba74">STAR Align (N-mask)</text>
+
+  <rect x="570" y="390" width="180" height="28" rx="8" fill="#022c22" stroke="#34d399" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="585" y="408" font-size="10" font-weight="700" fill="#34d399">4b</text>
+  <text x="660" y="408" text-anchor="middle" font-size="11" font-weight="600" fill="#6ee7b7">STAR Align (Ref)</text>
+
+  <!-- Down to sort/dedup -->
+  <path d="M260,418 L260,450" stroke="#fb923c" stroke-width="2.5" opacity="0.6"/>
+  <path d="M660,418 L660,450" stroke="#34d399" stroke-width="2.5" opacity="0.6"/>
+
+  <!-- ═══ SORT + DEDUP ═══ -->
+  <rect x="170" y="450" width="180" height="28" rx="8" fill="#431407" stroke="#fb923c" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="185" y="468" font-size="10" font-weight="700" fill="#fb923c">5a</text>
+  <text x="260" y="468" text-anchor="middle" font-size="11" font-weight="600" fill="#fdba74">Sort + Dedup</text>
+
+  <rect x="570" y="450" width="180" height="28" rx="8" fill="#022c22" stroke="#34d399" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="585" y="468" font-size="10" font-weight="700" fill="#34d399">5b</text>
+  <text x="660" y="468" text-anchor="middle" font-size="11" font-weight="600" fill="#6ee7b7">Sort + Dedup</text>
+
+  <!-- N-mask → SNPsplit -->
+  <path d="M260,478 L260,515" stroke="#f472b6" stroke-width="2.5" opacity="0.6"/>
+  <!-- Ref → featureCounts ref -->
+  <path d="M660,478 L660,590" stroke="#34d399" stroke-width="2.5" opacity="0.6"/>
+
+  <!-- ═══ SNPSPLIT ═══ -->
+  <rect x="160" y="515" width="200" height="32" rx="8" fill="#500724" stroke="#f472b6" stroke-width="2" filter="url(#glow)"/>
+  <text x="175" y="535" font-size="10" font-weight="700" fill="#f472b6">6</text>
+  <text x="260" y="535" text-anchor="middle" font-size="13" font-weight="700" fill="#f9a8d4">SNPsplit</text>
+  <text x="260" y="535" text-anchor="middle" font-size="9" fill="#64748b" dy="14">allele separation</text>
+
+  <!-- SNPsplit → genome1 (left) + genome2 (right) -->
+  <path d="M210,547 L150,580" stroke="#fbbf24" stroke-width="2" opacity="0.6"/>
+  <path d="M310,547 L370,580" stroke="#818cf8" stroke-width="2" opacity="0.6"/>
+
+  <!-- ═══ FEATURECOUNTS (3 boxes) ═══ -->
+  <!-- Genome1 -->
+  <rect x="60" y="580" width="180" height="30" rx="8" fill="#422006" stroke="#fbbf24" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="75" y="599" font-size="10" font-weight="700" fill="#fbbf24">7a</text>
+  <text x="150" y="599" text-anchor="middle" font-size="10" font-weight="600" fill="#fde68a">featureCounts (genome1)</text>
+  <text x="150" y="599" text-anchor="middle" font-size="8" fill="#64748b" dy="13">strain1 — CAST_EiJ</text>
+
+  <!-- Genome2 -->
+  <rect x="280" y="580" width="180" height="30" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="295" y="599" font-size="10" font-weight="700" fill="#818cf8">7b</text>
+  <text x="370" y="599" text-anchor="middle" font-size="10" font-weight="600" fill="#a5b4fc">featureCounts (genome2)</text>
+  <text x="370" y="599" text-anchor="middle" font-size="8" fill="#64748b" dy="13">strain2 — C57BL_6NJ</text>
+
+  <!-- Reference -->
+  <rect x="570" y="580" width="180" height="30" rx="8" fill="#022c22" stroke="#34d399" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="585" y="599" font-size="10" font-weight="700" fill="#34d399">7c</text>
+  <text x="660" y="599" text-anchor="middle" font-size="10" font-weight="600" fill="#6ee7b7">featureCounts (ref)</text>
+  <text x="660" y="599" text-anchor="middle" font-size="8" fill="#64748b" dy="13">standard reference</text>
+
+  <!-- All → MultiQC -->
+  <path d="M150,623 C150,660 460,660 460,680" stroke="#fbbf24" stroke-width="1.5" opacity="0.3" stroke-dasharray="5,4"/>
+  <path d="M370,623 C370,660 460,660 460,680" stroke="#818cf8" stroke-width="1.5" opacity="0.3" stroke-dasharray="5,4"/>
+  <path d="M660,623 C660,660 460,660 460,680" stroke="#34d399" stroke-width="1.5" opacity="0.3" stroke-dasharray="5,4"/>
+
+  <!-- ═══ MULTIQC ═══ -->
+  <rect x="390" y="670" width="140" height="32" rx="16" fill="#065f46" stroke="#34d399" stroke-width="2" filter="url(#glow)"/>
+  <text x="460" y="690" text-anchor="middle" font-size="9" font-weight="700" fill="#34d399">8</text>
+  <text x="474" y="691" font-size="13" font-weight="700" fill="#6ee7b7">MultiQC</text>
+
+  <!-- ═══ LEGEND ═══ -->
+  <rect x="30" y="670" width="200" height="65" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" opacity="0.9"/>
+  <text x="130" y="688" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">LEGEND</text>
+  <line x1="45" y1="700" x2="75" y2="700" stroke="#fb923c" stroke-width="2.5"/>
+  <text x="82" y="704" font-size="9" fill="#94a3b8">N-masked track</text>
+  <line x1="45" y1="716" x2="75" y2="716" stroke="#34d399" stroke-width="2.5"/>
+  <text x="82" y="720" font-size="9" fill="#94a3b8">Reference track</text>
+
+  <!-- Track labels -->
+  <rect x="700" y="670" width="190" height="65" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" opacity="0.9"/>
+  <text x="795" y="688" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">DEFAULT STRAINS</text>
+  <text x="715" y="706" font-size="9" fill="#fde68a">genome1: CAST_EiJ</text>
+  <text x="715" y="722" font-size="9" fill="#a5b4fc">genome2: C57BL_6NJ</text>
+
+  <!-- Bottom tagline -->
+  <text x="460" y="745" text-anchor="middle" font-size="9" fill="#475569">IPNP-BIPN/SPLIT • Nextflow DSL2 • github.com/IPNP-BIPN/SPLIT</text>
+</svg>
