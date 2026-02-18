@@ -14,90 +14,66 @@ Ultra-minimalist — 2 files only (`main.nf` + `nextflow.config`). Designed for 
 
 ```mermaid
 flowchart TD
-    subgraph INPUT ["Input"]
-        direction TB
-        SRA["SRR / ERR / DRR"]
-        GEO["GSE / GSM"]
+    subgraph INPUT ["Input (one of)"]
+        SRA["SRR / ERR / DRR"] --> SRA_DL["SRA_DOWNLOAD"]
+        GEO["GSE / GSM"] --> RESOLVE["RESOLVE_GEO"] --> SRA_DL
         FQ_DIR["FASTQ directory"]
         CSV["CSV samplesheet"]
     end
 
-    GEO -->|"NCBI E-utils"| RESOLVE_GEO["RESOLVE_GEO"]
-    SRA --> SRA_DOWNLOAD["SRA_DOWNLOAD"]
-    RESOLVE_GEO -->|"SRR IDs"| SRA_DOWNLOAD
-    FQ_DIR --> FASTQS(("FASTQs"))
+    SRA_DL --> FASTQS(("FASTQs"))
+    FQ_DIR --> FASTQS
     CSV --> FASTQS
-    SRA_DOWNLOAD --> FASTQS
 
-    subgraph REFS ["References"]
-        direction TB
-        DOWNLOAD["DOWNLOAD_REFERENCES"]
+    DOWNLOAD["DOWNLOAD_REFERENCES\n(FASTA + GTF + VCF)"] -->|"FASTA + VCF"| GPREP["SNPSPLIT_GENOME_PREP"]
+
+    FASTQS --> READLEN["ESTIMATE_READ_LENGTH"]
+
+    GPREP -->|"N-masked FASTA"| IDX1["STAR_INDEX (N-masked)"]
+    DOWNLOAD -->|"ref FASTA + GTF"| IDX2["STAR_INDEX (reference)"]
+    READLEN -->|"sjdbOverhang"| IDX1
+    READLEN -->|"sjdbOverhang"| IDX2
+
+    FASTQS --> A1 & A2
+
+    subgraph TRACK1 ["N-masked track"]
+        A1["STAR_ALIGN"] --> S1["SORT_DEDUP"] --> SNP["SNPSPLIT"]
     end
 
-    DOWNLOAD -->|"FASTA + VCF"| SNPSPLIT_PREP["SNPSPLIT_GENOME_PREP"]
-
-    FASTQS -->|"first FASTQ"| READ_LEN["ESTIMATE_READ_LENGTH"]
-
-    SNPSPLIT_PREP -->|"N-masked FASTA"| IDX_NMASK["STAR_INDEX\n(N-masked)"]
-    DOWNLOAD -->|"ref FASTA"| IDX_REF["STAR_INDEX\n(reference)"]
-    DOWNLOAD -->|"GTF"| IDX_NMASK
-    DOWNLOAD -->|"GTF"| IDX_REF
-    READ_LEN -->|"sjdbOverhang"| IDX_NMASK
-    READ_LEN -->|"sjdbOverhang"| IDX_REF
-
-    subgraph NMASK_TRACK ["N-masked track"]
-        direction TB
-        ALIGN_NM["STAR_ALIGN\n(N-masked)"]
-        SORT_NM["SORT_DEDUP"]
-        SPLIT_ALLELE["SNPSPLIT"]
+    subgraph TRACK2 ["Reference track"]
+        A2["STAR_ALIGN"] --> S2["SORT_DEDUP"]
     end
 
-    FASTQS --> ALIGN_NM
-    IDX_NMASK --> ALIGN_NM
-    ALIGN_NM --> SORT_NM
-    SORT_NM --> SPLIT_ALLELE
-    SNPSPLIT_PREP -->|"SNP file"| SPLIT_ALLELE
+    IDX1 --> A1
+    IDX2 --> A2
+    GPREP -->|"SNP file"| SNP
 
-    subgraph REF_TRACK ["Reference track"]
-        direction TB
-        ALIGN_REF["STAR_ALIGN\n(reference)"]
-        SORT_REF["SORT_DEDUP"]
-    end
+    SNP -->|"genome1 BAMs"| FC1["FEATURECOUNTS (genome1)"]
+    SNP -->|"genome2 BAMs"| FC2["FEATURECOUNTS (genome2)"]
+    S2 --> FC3["FEATURECOUNTS (reference)"]
 
-    FASTQS --> ALIGN_REF
-    IDX_REF --> ALIGN_REF
-    ALIGN_REF --> SORT_REF
+    FC1 --> MQC["MULTIQC"]
+    FC2 --> MQC
+    FC3 --> MQC
+    A1 -->|"logs"| MQC
+    A2 -->|"logs"| MQC
 
-    SPLIT_ALLELE -->|"genome1 BAMs"| FC_G1["FEATURECOUNTS\n(genome1)"]
-    SPLIT_ALLELE -->|"genome2 BAMs"| FC_G2["FEATURECOUNTS\n(genome2)"]
-    SORT_REF --> FC_REF["FEATURECOUNTS\n(reference)"]
+    FC1 --> O1["genome1 counts (strain1)"]
+    FC2 --> O2["genome2 counts (strain2)"]
+    FC3 --> O3["reference counts"]
+    MQC --> O4["MultiQC report"]
 
-    DOWNLOAD -->|"GTF"| FC_G1
-    DOWNLOAD -->|"GTF"| FC_G2
-    DOWNLOAD -->|"GTF"| FC_REF
+    classDef input fill:#3498db,stroke:#2c6fbb,color:#fff
+    classDef process fill:#2c3e50,stroke:#1a252f,color:#fff
+    classDef key fill:#c0392b,stroke:#922b21,color:#fff,stroke-width:3px
+    classDef output fill:#27ae60,stroke:#1e8449,color:#fff
+    classDef data fill:#f39c12,stroke:#d68910,color:#fff
 
-    ALIGN_NM -->|"STAR logs"| MULTIQC["MULTIQC"]
-    ALIGN_REF -->|"STAR logs"| MULTIQC
-    FC_G1 -->|"summary"| MULTIQC
-    FC_G2 -->|"summary"| MULTIQC
-    FC_REF -->|"summary"| MULTIQC
-
-    FC_G1 --> OUT_G1["genome1 counts\n(strain1)"]
-    FC_G2 --> OUT_G2["genome2 counts\n(strain2)"]
-    FC_REF --> OUT_REF["reference counts"]
-    MULTIQC --> OUT_QC["MultiQC report"]
-
-    classDef inputStyle fill:#3498db,stroke:#2c6fbb,color:#fff,stroke-width:2px
-    classDef processStyle fill:#2c3e50,stroke:#1a252f,color:#fff,stroke-width:2px
-    classDef keyProcess fill:#c0392b,stroke:#922b21,color:#fff,stroke-width:3px
-    classDef outputStyle fill:#27ae60,stroke:#1e8449,color:#fff,stroke-width:2px
-    classDef dataNode fill:#f39c12,stroke:#d68910,color:#fff,stroke-width:2px
-
-    class SRA,GEO,FQ_DIR,CSV inputStyle
-    class RESOLVE_GEO,SRA_DOWNLOAD,DOWNLOAD,SNPSPLIT_PREP,IDX_NMASK,IDX_REF,READ_LEN,ALIGN_NM,SORT_NM,ALIGN_REF,SORT_REF,FC_G1,FC_G2,FC_REF,MULTIQC processStyle
-    class SPLIT_ALLELE keyProcess
-    class OUT_G1,OUT_G2,OUT_REF,OUT_QC outputStyle
-    class FASTQS dataNode
+    class SRA,GEO,FQ_DIR,CSV input
+    class SRA_DL,RESOLVE,DOWNLOAD,GPREP,IDX1,IDX2,READLEN,A1,S1,A2,S2,FC1,FC2,FC3,MQC process
+    class SNP key
+    class O1,O2,O3,O4 output
+    class FASTQS data
 ```
 
 ## Quick Start
