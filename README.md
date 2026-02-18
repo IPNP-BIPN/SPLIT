@@ -13,6 +13,7 @@ Ultra-minimalist — 2 files only (`main.nf` + `nextflow.config`). Designed for 
 ## Pipeline Overview
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'background': '#ffffff', 'primaryTextColor': '#000000', 'lineColor': '#333333', 'textColor': '#000000', 'mainBkg': '#ffffff'}}}%%
 flowchart TD
     subgraph INPUT ["Input (one of)"]
         SRA["SRR / ERR / DRR"] --> SRA_DL["SRA_DOWNLOAD"]
