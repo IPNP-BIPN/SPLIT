@@ -16,78 +16,78 @@ Ultra-minimalist — 2 files only (`main.nf` + `nextflow.config`). Designed for 
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#4a90d9', 'primaryTextColor': '#fff', 'primaryBorderColor': '#2c6fbb', 'lineColor': '#5a6d7e', 'secondaryColor': '#e8f4f8', 'tertiaryColor': '#f0f0f0', 'fontSize': '14px'}}}%%
 
 flowchart TD
-    subgraph INPUT ["📥 Input"]
+    subgraph INPUT [Input]
         direction TB
-        SRA["SRR / ERR / DRR accessions"]
-        GEO["GSE / GSM accessions"]
-        FQ_DIR["FASTQ directory"]
-        CSV["CSV samplesheet"]
+        SRA[SRR / ERR / DRR]
+        GEO[GSE / GSM]
+        FQ_DIR[FASTQ directory]
+        CSV[CSV samplesheet]
     end
 
-    GEO -->|"NCBI E-utils"| RESOLVE_GEO["<b>RESOLVE_GEO</b><br/><i>Python urllib</i>"]
-    SRA --> SRA_DOWNLOAD["<b>SRA_DOWNLOAD</b><br/><i>fasterq-dump + pigz</i>"]
+    GEO -->|NCBI E-utils| RESOLVE_GEO[RESOLVE_GEO]
+    SRA --> SRA_DOWNLOAD[SRA_DOWNLOAD]
     RESOLVE_GEO -->|SRR IDs| SRA_DOWNLOAD
-    FQ_DIR --> FASTQS(("FASTQs"))
+    FQ_DIR --> FASTQS((FASTQs))
     CSV --> FASTQS
     SRA_DOWNLOAD --> FASTQS
 
-    subgraph REFS ["📦 References  (Ensembl / MGP)"]
+    subgraph REFS [References - Ensembl / MGP]
         direction TB
-        DOWNLOAD["<b>DOWNLOAD_REFERENCES</b><br/><i>genome FASTA + GTF + VCF</i>"]
+        DOWNLOAD[DOWNLOAD_REFERENCES]
     end
 
-    DOWNLOAD -->|"FASTA + VCF"| SNPSPLIT_PREP["<b>SNPSPLIT_GENOME_PREP</b><br/><i>N-masked genome + SNP file</i>"]
+    DOWNLOAD -->|FASTA + VCF| SNPSPLIT_PREP[SNPSPLIT_GENOME_PREP]
 
-    FASTQS -->|"first FASTQ"| READ_LEN["<b>ESTIMATE_READ_LENGTH</b><br/><i>sjdbOverhang</i>"]
+    FASTQS -->|first FASTQ| READ_LEN[ESTIMATE_READ_LENGTH]
 
-    SNPSPLIT_PREP -->|"N-masked FASTA"| IDX_NMASK["<b>STAR_INDEX</b><br/><i>N-masked genome</i>"]
-    DOWNLOAD -->|"ref FASTA"| IDX_REF["<b>STAR_INDEX</b><br/><i>reference genome</i>"]
+    SNPSPLIT_PREP -->|N-masked FASTA| IDX_NMASK[STAR_INDEX - N-masked]
+    DOWNLOAD -->|ref FASTA| IDX_REF[STAR_INDEX - reference]
     DOWNLOAD -->|GTF| IDX_NMASK
     DOWNLOAD -->|GTF| IDX_REF
     READ_LEN -->|sjdbOverhang| IDX_NMASK
     READ_LEN -->|sjdbOverhang| IDX_REF
 
-    subgraph NMASK_TRACK ["🟠 N-masked track"]
+    subgraph NMASK_TRACK [N-masked track]
         direction TB
-        ALIGN_NM["<b>STAR_ALIGN</b><br/><i>N-masked</i>"]
-        SORT_NM["<b>SORT_DEDUP</b><br/><i>samtools sort + markdup</i>"]
-        SPLIT_ALLELE["<b>SNPSPLIT</b><br/><i>allele separation</i>"]
+        ALIGN_NM[STAR_ALIGN - N-masked]
+        SORT_NM[SORT_DEDUP]
+        SPLIT_ALLELE[SNPSPLIT]
     end
 
     FASTQS --> ALIGN_NM
     IDX_NMASK --> ALIGN_NM
     ALIGN_NM --> SORT_NM
     SORT_NM --> SPLIT_ALLELE
-    SNPSPLIT_PREP -->|"SNP file"| SPLIT_ALLELE
+    SNPSPLIT_PREP -->|SNP file| SPLIT_ALLELE
 
-    subgraph REF_TRACK ["🟢 Reference track"]
+    subgraph REF_TRACK [Reference track]
         direction TB
-        ALIGN_REF["<b>STAR_ALIGN</b><br/><i>reference</i>"]
-        SORT_REF["<b>SORT_DEDUP</b><br/><i>samtools sort + markdup</i>"]
+        ALIGN_REF[STAR_ALIGN - reference]
+        SORT_REF[SORT_DEDUP]
     end
 
     FASTQS --> ALIGN_REF
     IDX_REF --> ALIGN_REF
     ALIGN_REF --> SORT_REF
 
-    SPLIT_ALLELE -->|"genome1 BAMs"| FC_G1["<b>FEATURECOUNTS</b><br/><i>genome1 · CAST_EiJ</i>"]
-    SPLIT_ALLELE -->|"genome2 BAMs"| FC_G2["<b>FEATURECOUNTS</b><br/><i>genome2 · C57BL_6NJ</i>"]
-    SORT_REF --> FC_REF["<b>FEATURECOUNTS</b><br/><i>reference</i>"]
+    SPLIT_ALLELE -->|genome1 BAMs| FC_G1[FEATURECOUNTS - genome1]
+    SPLIT_ALLELE -->|genome2 BAMs| FC_G2[FEATURECOUNTS - genome2]
+    SORT_REF --> FC_REF[FEATURECOUNTS - reference]
 
     DOWNLOAD -->|GTF| FC_G1
     DOWNLOAD -->|GTF| FC_G2
     DOWNLOAD -->|GTF| FC_REF
 
-    ALIGN_NM -->|"STAR logs"| MULTIQC["<b>MULTIQC</b><br/><i>aggregate report</i>"]
-    ALIGN_REF -->|"STAR logs"| MULTIQC
+    ALIGN_NM -->|STAR logs| MULTIQC[MULTIQC]
+    ALIGN_REF -->|STAR logs| MULTIQC
     FC_G1 -->|summary| MULTIQC
     FC_G2 -->|summary| MULTIQC
     FC_REF -->|summary| MULTIQC
 
-    FC_G1 --> OUT_G1[/"🧬 genome1 counts (strain1)"/]
-    FC_G2 --> OUT_G2[/"🧬 genome2 counts (strain2)"/]
-    FC_REF --> OUT_REF[/"🧬 reference counts"/]
-    MULTIQC --> OUT_QC[/"📊 MultiQC report"/]
+    FC_G1 --> OUT_G1[/genome1 counts - strain1/]
+    FC_G2 --> OUT_G2[/genome2 counts - strain2/]
+    FC_REF --> OUT_REF[/reference counts/]
+    MULTIQC --> OUT_QC[/MultiQC report/]
 
     classDef inputStyle fill:#3498db,stroke:#2c6fbb,color:#fff,stroke-width:2px
     classDef processStyle fill:#2c3e50,stroke:#1a252f,color:#fff,stroke-width:2px
