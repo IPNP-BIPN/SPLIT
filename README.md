@@ -12,55 +12,95 @@ Ultra-minimalist — 2 files only (`main.nf` + `nextflow.config`). Designed for 
 
 ## Pipeline Overview
 
-<p align="center">
-  <img src="docs/images/SPLIT_metro_map.png" alt="SPLIT pipeline diagram" width="800">
-</p>
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#4a90d9', 'primaryTextColor': '#fff', 'primaryBorderColor': '#2c6fbb', 'lineColor': '#5a6d7e', 'secondaryColor': '#e8f4f8', 'tertiaryColor': '#f0f0f0', 'fontSize': '14px'}}}%%
 
-<details>
-<summary>Text diagram</summary>
+flowchart TD
+    subgraph INPUT ["📥 Input"]
+        direction TB
+        SRA["SRR / ERR / DRR accessions"]
+        GEO["GSE / GSM accessions"]
+        FQ_DIR["FASTQ directory"]
+        CSV["CSV samplesheet"]
+    end
 
+    GEO -->|"NCBI E-utils"| RESOLVE_GEO["<b>RESOLVE_GEO</b><br/><i>Python urllib</i>"]
+    SRA --> SRA_DOWNLOAD["<b>SRA_DOWNLOAD</b><br/><i>fasterq-dump + pigz</i>"]
+    RESOLVE_GEO -->|SRR IDs| SRA_DOWNLOAD
+    FQ_DIR --> FASTQS(("FASTQs"))
+    CSV --> FASTQS
+    SRA_DOWNLOAD --> FASTQS
+
+    subgraph REFS ["📦 References  (Ensembl / MGP)"]
+        direction TB
+        DOWNLOAD["<b>DOWNLOAD_REFERENCES</b><br/><i>genome FASTA + GTF + VCF</i>"]
+    end
+
+    DOWNLOAD -->|"FASTA + VCF"| SNPSPLIT_PREP["<b>SNPSPLIT_GENOME_PREP</b><br/><i>N-masked genome + SNP file</i>"]
+
+    FASTQS -->|"first FASTQ"| READ_LEN["<b>ESTIMATE_READ_LENGTH</b><br/><i>sjdbOverhang</i>"]
+
+    SNPSPLIT_PREP -->|"N-masked FASTA"| IDX_NMASK["<b>STAR_INDEX</b><br/><i>N-masked genome</i>"]
+    DOWNLOAD -->|"ref FASTA"| IDX_REF["<b>STAR_INDEX</b><br/><i>reference genome</i>"]
+    DOWNLOAD -->|GTF| IDX_NMASK
+    DOWNLOAD -->|GTF| IDX_REF
+    READ_LEN -->|sjdbOverhang| IDX_NMASK
+    READ_LEN -->|sjdbOverhang| IDX_REF
+
+    subgraph NMASK_TRACK ["🟠 N-masked track"]
+        direction TB
+        ALIGN_NM["<b>STAR_ALIGN</b><br/><i>N-masked</i>"]
+        SORT_NM["<b>SORT_DEDUP</b><br/><i>samtools sort + markdup</i>"]
+        SPLIT_ALLELE["<b>SNPSPLIT</b><br/><i>allele separation</i>"]
+    end
+
+    FASTQS --> ALIGN_NM
+    IDX_NMASK --> ALIGN_NM
+    ALIGN_NM --> SORT_NM
+    SORT_NM --> SPLIT_ALLELE
+    SNPSPLIT_PREP -->|"SNP file"| SPLIT_ALLELE
+
+    subgraph REF_TRACK ["🟢 Reference track"]
+        direction TB
+        ALIGN_REF["<b>STAR_ALIGN</b><br/><i>reference</i>"]
+        SORT_REF["<b>SORT_DEDUP</b><br/><i>samtools sort + markdup</i>"]
+    end
+
+    FASTQS --> ALIGN_REF
+    IDX_REF --> ALIGN_REF
+    ALIGN_REF --> SORT_REF
+
+    SPLIT_ALLELE -->|"genome1 BAMs"| FC_G1["<b>FEATURECOUNTS</b><br/><i>genome1 · CAST_EiJ</i>"]
+    SPLIT_ALLELE -->|"genome2 BAMs"| FC_G2["<b>FEATURECOUNTS</b><br/><i>genome2 · C57BL_6NJ</i>"]
+    SORT_REF --> FC_REF["<b>FEATURECOUNTS</b><br/><i>reference</i>"]
+
+    DOWNLOAD -->|GTF| FC_G1
+    DOWNLOAD -->|GTF| FC_G2
+    DOWNLOAD -->|GTF| FC_REF
+
+    ALIGN_NM -->|"STAR logs"| MULTIQC["<b>MULTIQC</b><br/><i>aggregate report</i>"]
+    ALIGN_REF -->|"STAR logs"| MULTIQC
+    FC_G1 -->|summary| MULTIQC
+    FC_G2 -->|summary| MULTIQC
+    FC_REF -->|summary| MULTIQC
+
+    FC_G1 --> OUT_G1[/"🧬 genome1 counts (strain1)"/]
+    FC_G2 --> OUT_G2[/"🧬 genome2 counts (strain2)"/]
+    FC_REF --> OUT_REF[/"🧬 reference counts"/]
+    MULTIQC --> OUT_QC[/"📊 MultiQC report"/]
+
+    classDef inputStyle fill:#3498db,stroke:#2c6fbb,color:#fff,stroke-width:2px
+    classDef processStyle fill:#2c3e50,stroke:#1a252f,color:#fff,stroke-width:2px
+    classDef keyProcess fill:#c0392b,stroke:#922b21,color:#fff,stroke-width:3px
+    classDef outputStyle fill:#27ae60,stroke:#1e8449,color:#fff,stroke-width:2px
+    classDef dataNode fill:#f39c12,stroke:#d68910,color:#fff,stroke-width:2px
+
+    class SRA,GEO,FQ_DIR,CSV inputStyle
+    class RESOLVE_GEO,SRA_DOWNLOAD,DOWNLOAD,SNPSPLIT_PREP,IDX_NMASK,IDX_REF,READ_LEN,ALIGN_NM,SORT_NM,ALIGN_REF,SORT_REF,FC_G1,FC_G2,FC_REF,MULTIQC processStyle
+    class SPLIT_ALLELE keyProcess
+    class OUT_G1,OUT_G2,OUT_REF,OUT_QC outputStyle
+    class FASTQS dataNode
 ```
-  FASTQ / SRA / GEO
-         │
-         ▼
-  1. Download References (FASTA + GTF + VCF)
-         │
-         ▼
-  2. SNPsplit Genome Prep (dual-hybrid N-masking)
-         │
-         ▼
-    Estimate Read Length
-         │
-    ┌────┴────┐
-    ▼         ▼
-  3a. STAR   3b. STAR
-  Index      Index
-  (N-mask)   (Ref)
-    │         │
-    ▼         ▼
-  4a. STAR   4b. STAR
-  Align      Align
-    │         │
-    ▼         ▼
-  5a. Sort   5b. Sort
-  + Dedup    + Dedup
-    │         │
-    ▼         │
-  6. SNPsplit │
-  (allele    │
-  separation)│
-    │    │    │
-    ▼    ▼    ▼
-  7a.  7b.  7c.
-  fC   fC   fC
-  g1   g2   ref
-    │    │    │
-    └────┼────┘
-         ▼
-  8. MultiQC
-```
-
-</details>
 
 ## Quick Start
 
