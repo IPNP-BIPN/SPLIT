@@ -13,7 +13,7 @@ Ultra-minimalist — 2 files only (`main.nf` + `nextflow.config`). Designed for 
 ## Pipeline Overview
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'background': '#ffffff', 'primaryTextColor': '#000000', 'lineColor': '#333333', 'textColor': '#000000', 'mainBkg': '#ffffff'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'background': '#ffffff', 'primaryTextColor': '#231f20', 'lineColor': '#999999', 'textColor': '#231f20', 'mainBkg': '#ffffff', 'nodeBorder': '#999999'}}}%%
 flowchart TD
     subgraph INPUT ["Input (one of)"]
         SRA["SRR / ERR / DRR"] --> SRA_DL["SRA_DOWNLOAD"]
@@ -53,17 +53,19 @@ flowchart TD
     FC3 --> O3["reference counts"]
     FC1 & FC2 & FC3 --> MQC["MULTIQC"] --> O4["MultiQC report"]
 
-    classDef input fill:#3498db,stroke:#2c6fbb,color:#fff
-    classDef process fill:#34495e,stroke:#2c3e50,color:#fff
-    classDef key fill:#e74c3c,stroke:#c0392b,color:#fff,stroke-width:3px
-    classDef output fill:#2ecc71,stroke:#27ae60,color:#fff
-    classDef data fill:#f39c12,stroke:#e67e22,color:#fff
+    classDef input fill:#0570b0,stroke:#0570b0,color:#fff
+    classDef process fill:#238b45,stroke:#238b45,color:#fff
+    classDef key fill:#cb181d,stroke:#cb181d,color:#fff,stroke-width:3px
+    classDef output fill:#6a51a3,stroke:#6a51a3,color:#fff
+    classDef data fill:#e6550d,stroke:#e6550d,color:#fff
+    classDef ref fill:#41ab5d,stroke:#41ab5d,color:#fff
 
     class SRA,GEO,FQ_DIR,CSV input
-    class SRA_DL,RESOLVE,DOWNLOAD,GPREP,IDX1,IDX2,A1,S1,A2,S2,FC1,FC2,FC3,MQC process
+    class SRA_DL,RESOLVE,DOWNLOAD,GPREP,IDX1,IDX2,A1,S1,A2,S2,FC1,FC2,FC3 process
     class SNP key
     class O1,O2,O3,O4 output
     class FASTQS data
+    class MQC ref
 ```
 
 ## Quick Start
