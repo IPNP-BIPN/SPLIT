@@ -26,16 +26,10 @@ flowchart TD
     FQ_DIR --> FASTQS
     CSV --> FASTQS
 
-    DOWNLOAD["DOWNLOAD_REFERENCES\n(FASTA + GTF + VCF)"] -->|"FASTA + VCF"| GPREP["SNPSPLIT_GENOME_PREP"]
+    DOWNLOAD["DOWNLOAD_REFERENCES"] --> GPREP["SNPSPLIT_GENOME_PREP"]
 
-    FASTQS --> READLEN["ESTIMATE_READ_LENGTH"]
-
-    GPREP -->|"N-masked FASTA"| IDX1["STAR_INDEX (N-masked)"]
-    DOWNLOAD -->|"ref FASTA + GTF"| IDX2["STAR_INDEX (reference)"]
-    READLEN -->|"sjdbOverhang"| IDX1
-    READLEN -->|"sjdbOverhang"| IDX2
-
-    FASTQS --> A1 & A2
+    GPREP --> IDX1["STAR_INDEX (N-masked)"]
+    DOWNLOAD --> IDX2["STAR_INDEX (reference)"]
 
     subgraph TRACK1 ["N-masked track"]
         A1["STAR_ALIGN"] --> S1["SORT_DEDUP"] --> SNP["SNPSPLIT"]
@@ -45,24 +39,19 @@ flowchart TD
         A2["STAR_ALIGN"] --> S2["SORT_DEDUP"]
     end
 
+    FASTQS --> A1
+    FASTQS --> A2
     IDX1 --> A1
     IDX2 --> A2
-    GPREP -->|"SNP file"| SNP
 
-    SNP -->|"genome1 BAMs"| FC1["FEATURECOUNTS (genome1)"]
-    SNP -->|"genome2 BAMs"| FC2["FEATURECOUNTS (genome2)"]
+    SNP -->|"genome1"| FC1["FEATURECOUNTS (genome1)"]
+    SNP -->|"genome2"| FC2["FEATURECOUNTS (genome2)"]
     S2 --> FC3["FEATURECOUNTS (reference)"]
 
-    FC1 --> MQC["MULTIQC"]
-    FC2 --> MQC
-    FC3 --> MQC
-    A1 -->|"logs"| MQC
-    A2 -->|"logs"| MQC
-
-    FC1 --> O1["genome1 counts (strain1)"]
-    FC2 --> O2["genome2 counts (strain2)"]
+    FC1 --> O1["genome1 counts"]
+    FC2 --> O2["genome2 counts"]
     FC3 --> O3["reference counts"]
-    MQC --> O4["MultiQC report"]
+    FC1 & FC2 & FC3 --> MQC["MULTIQC"] --> O4["MultiQC report"]
 
     classDef input fill:#3498db,stroke:#2c6fbb,color:#fff
     classDef process fill:#34495e,stroke:#2c3e50,color:#fff
@@ -71,7 +60,7 @@ flowchart TD
     classDef data fill:#f39c12,stroke:#e67e22,color:#fff
 
     class SRA,GEO,FQ_DIR,CSV input
-    class SRA_DL,RESOLVE,DOWNLOAD,GPREP,IDX1,IDX2,READLEN,A1,S1,A2,S2,FC1,FC2,FC3,MQC process
+    class SRA_DL,RESOLVE,DOWNLOAD,GPREP,IDX1,IDX2,A1,S1,A2,S2,FC1,FC2,FC3,MQC process
     class SNP key
     class O1,O2,O3,O4 output
     class FASTQS data
