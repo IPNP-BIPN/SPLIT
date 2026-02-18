@@ -27,26 +27,19 @@ flowchart TD
     CSV --> FASTQS
 
     DOWNLOAD["DOWNLOAD_REFERENCES"] --> GPREP["SNPSPLIT_GENOME_PREP"]
-
     GPREP --> IDX1["STAR_INDEX (N-masked)"]
     DOWNLOAD --> IDX2["STAR_INDEX (reference)"]
 
-    subgraph TRACK1 ["N-masked track"]
-        A1["STAR_ALIGN"] --> S1["SORT_DEDUP"] --> SNP["SNPSPLIT"]
-    end
-
-    subgraph TRACK2 ["Reference track"]
-        A2["STAR_ALIGN"] --> S2["SORT_DEDUP"]
-    end
-
+    IDX1 --> A1["STAR_ALIGN (N-masked)"]
+    IDX2 --> A2["STAR_ALIGN (reference)"]
     FASTQS --> A1
     FASTQS --> A2
-    IDX1 --> A1
-    IDX2 --> A2
+
+    A1 --> S1["SORT_DEDUP"] --> SNP["SNPSPLIT"]
+    A2 --> S2["SORT_DEDUP "] --> FC3["FEATURECOUNTS (reference)"]
 
     SNP -->|"genome1"| FC1["FEATURECOUNTS (genome1)"]
     SNP -->|"genome2"| FC2["FEATURECOUNTS (genome2)"]
-    S2 --> FC3["FEATURECOUNTS (reference)"]
 
     FC1 --> O1["genome1 counts"]
     FC2 --> O2["genome2 counts"]
@@ -58,14 +51,14 @@ flowchart TD
     classDef key fill:#cb181d,stroke:#cb181d,color:#fff,stroke-width:3px
     classDef output fill:#6a51a3,stroke:#6a51a3,color:#fff
     classDef data fill:#e6550d,stroke:#e6550d,color:#fff
-    classDef ref fill:#41ab5d,stroke:#41ab5d,color:#fff
+    classDef mqc fill:#41ab5d,stroke:#41ab5d,color:#fff
 
     class SRA,GEO,FQ_DIR,CSV input
     class SRA_DL,RESOLVE,DOWNLOAD,GPREP,IDX1,IDX2,A1,S1,A2,S2,FC1,FC2,FC3 process
     class SNP key
     class O1,O2,O3,O4 output
     class FASTQS data
-    class MQC ref
+    class MQC mqc
 ```
 
 ## Quick Start
