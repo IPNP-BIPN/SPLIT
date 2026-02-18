@@ -64,10 +64,10 @@ flowchart TD
     MQC --> O4["MultiQC report"]
 
     classDef input fill:#3498db,stroke:#2c6fbb,color:#fff
-    classDef process fill:#2c3e50,stroke:#1a252f,color:#fff
-    classDef key fill:#c0392b,stroke:#922b21,color:#fff,stroke-width:3px
-    classDef output fill:#27ae60,stroke:#1e8449,color:#fff
-    classDef data fill:#f39c12,stroke:#d68910,color:#fff
+    classDef process fill:#34495e,stroke:#2c3e50,color:#fff
+    classDef key fill:#e74c3c,stroke:#c0392b,color:#fff,stroke-width:3px
+    classDef output fill:#2ecc71,stroke:#27ae60,color:#fff
+    classDef data fill:#f39c12,stroke:#e67e22,color:#fff
 
     class SRA,GEO,FQ_DIR,CSV input
     class SRA_DL,RESOLVE,DOWNLOAD,GPREP,IDX1,IDX2,READLEN,A1,S1,A2,S2,FC1,FC2,FC3,MQC process
